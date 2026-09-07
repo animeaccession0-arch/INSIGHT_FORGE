@@ -124,6 +124,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-<script src="js/product.js"></script>
-<script src="js/predictive.js"></script>
-<script src="js/academic.js"></script>

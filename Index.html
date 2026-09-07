@@ -83,11 +83,10 @@
         </select>
       </div>
     </div>
-
     <p class="tagline" data-i18n="app.tagline">Turn Raw Data Into Decisions</p>
   </header>
 
-  <!-- ========== MAIN ========== -->
+  <!-- ========== MAIN CONTENT ========== -->
   <main class="container">
 
     <!-- Upload Section -->
@@ -136,32 +135,142 @@
       <div id="insightsList"></div>
     </section>
 
+    <!-- ==================== REVIEW SECTION ==================== -->
+    <section class="card" id="reviewSection">
+      <h2>⭐ Leave a Review</h2>
+      <p class="subtitle">How is your experience with InsightForge?</p>
+
+      <div class="review-form">
+        <input type="text" id="reviewerName" placeholder="Your Name (optional)" />
+        
+        <div class="star-rating">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star" data-value="5">★</span>
+        </div>
+        <input type="hidden" id="selectedRating" value="0" />
+
+        <textarea id="reviewComment" placeholder="Write your review here..." rows="4"></textarea>
+        
+        <button id="submitReviewBtn">Submit Review</button>
+        <p id="reviewMessage" class="review-message"></p>
+      </div>
+    </section>
+
+    <!-- ==================== ADMIN PANEL ==================== -->
+    <section class="card" id="adminSection">
+      <h2>🔐 Admin Panel</h2>
+      
+      <div id="adminLogin">
+        <input type="password" id="adminPassword" placeholder="Enter Admin Password" />
+        <button id="adminLoginBtn">Login</button>
+        <p id="adminError" class="error-text"></p>
+      </div>
+
+      <div id="adminDashboard" hidden>
+        <div class="admin-header">
+          <h3>All Reviews</h3>
+          <button id="logoutAdminBtn" class="danger-btn">Logout</button>
+        </div>
+        <div id="adminReviewsList"></div>
+        <button id="clearReviewsBtn" class="danger-btn" style="margin-top: 15px;">Clear All Reviews</button>
+      </div>
+    </section>
+
   </main>
 
   <footer class="footer">
     <p data-i18n="footer.text">InsightForge • Built with transparency and purpose</p>
   </footer>
 
-  <!-- Scripts -->
+  <!-- ========== SCRIPTS ========== -->
   <script src="js/i18n.js"></script>
   <script src="js/data.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/insights.js"></script>
+  <script src="js/reviews.js"></script>
+  <script src="js/admin.js"></script>
   <script src="js/app.js"></script>
 
   <script>
-    // Initialize language system
     document.addEventListener('DOMContentLoaded', () => {
+      // ===== Language System =====
       I18n.init();
-
       const languageSelect = document.getElementById('languageSelect');
-      
-      // Set current language in dropdown
       languageSelect.value = I18n.getCurrentLanguage();
-
-      // Change language when user selects
       languageSelect.addEventListener('change', (e) => {
         I18n.setLanguage(e.target.value);
+      });
+
+      // ===== Star Rating =====
+      const stars = document.querySelectorAll('.star');
+      const selectedRatingInput = document.getElementById('selectedRating');
+
+      stars.forEach(star => {
+        star.addEventListener('click', () => {
+          const value = star.getAttribute('data-value');
+          selectedRatingInput.value = value;
+
+          stars.forEach(s => {
+            s.classList.toggle('active', s.getAttribute('data-value') <= value);
+          });
+        });
+      });
+
+      // ===== Submit Review =====
+      document.getElementById('submitReviewBtn').addEventListener('click', () => {
+        const name = document.getElementById('reviewerName').value;
+        const rating = document.getElementById('selectedRating').value;
+        const comment = document.getElementById('reviewComment').value;
+        const message = document.getElementById('reviewMessage');
+
+        if (rating == 0) {
+          message.textContent = "Please select a rating.";
+          message.style.color = "#f87171";
+          return;
+        }
+
+        ReviewSystem.saveReview(name, rating, comment);
+        message.textContent = "Thank you for your review!";
+        message.style.color = "#4ade80";
+
+        // Reset form
+        document.getElementById('reviewerName').value = "";
+        document.getElementById('reviewComment').value = "";
+        selectedRatingInput.value = 0;
+        stars.forEach(s => s.classList.remove('active'));
+      });
+
+      // ===== Admin Login =====
+      document.getElementById('adminLoginBtn').addEventListener('click', () => {
+        const password = document.getElementById('adminPassword').value;
+        const error = document.getElementById('adminError');
+
+        if (AdminPanel.login(password)) {
+          document.getElementById('adminLogin').hidden = true;
+          document.getElementById('adminDashboard').hidden = false;
+          AdminPanel.renderReviews('adminReviewsList');
+          error.textContent = "";
+        } else {
+          error.textContent = "Wrong password!";
+        }
+      });
+
+      // ===== Admin Logout =====
+      document.getElementById('logoutAdminBtn').addEventListener('click', () => {
+        document.getElementById('adminLogin').hidden = false;
+        document.getElementById('adminDashboard').hidden = true;
+        document.getElementById('adminPassword').value = "";
+      });
+
+      // ===== Clear Reviews =====
+      document.getElementById('clearReviewsBtn').addEventListener('click', () => {
+        if (confirm("Are you sure you want to delete all reviews?")) {
+          ReviewSystem.clearAllReviews();
+          AdminPanel.renderReviews('adminReviewsList');
+        }
       });
     });
   </script>

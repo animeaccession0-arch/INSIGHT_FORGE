@@ -7,6 +7,7 @@ const HeritageQC = (() => {
 
   function analyzeQuality() {
     const { data, headers } = DataModule.getData();
+    
     if (!data || data.length === 0) {
       return {
         score: 0,
@@ -22,11 +23,12 @@ const HeritageQC = (() => {
     const issues = [];
     const details = {};
 
-    // 1. Missing Values Check
+    // Initialize column missing counter
     headers.forEach(header => {
       columnMissing[header] = 0;
     });
 
+    // 1. Missing Values Check
     data.forEach(row => {
       headers.forEach(header => {
         const value = row[header];
@@ -48,19 +50,16 @@ const HeritageQC = (() => {
       }
     });
 
-    // 3. Calculate Completeness
+    // 3. Completeness
     const completeness = totalCells > 0 
       ? ((totalCells - missingCount) / totalCells) * 100 
       : 0;
 
-    // 4. Quality Score Calculation
+    // 4. Quality Score
     let score = 100;
-
-    // Penalty for missing values
-    const missingPercentage = (missingCount / totalCells) * 100;
+    const missingPercentage = totalCells > 0 ? (missingCount / totalCells) * 100 : 0;
     score -= missingPercentage * 0.7;
 
-    // Penalty for duplicates
     if (data.length > 0) {
       const duplicatePercentage = (duplicateCount / data.length) * 100;
       score -= duplicatePercentage * 0.5;
@@ -68,7 +67,7 @@ const HeritageQC = (() => {
 
     score = Math.max(0, Math.min(100, Math.round(score)));
 
-    // 5. Generate Issues & Recommendations
+    // 5. Issues & Recommendations
     if (missingCount > 0) {
       issues.push(`Found \( {missingCount} missing values ( \){missingPercentage.toFixed(1)}% of data).`);
     } else {
@@ -81,7 +80,7 @@ const HeritageQC = (() => {
       issues.push("No duplicate rows found.");
     }
 
-    // Columns with high missing values
+    // High missing columns
     Object.entries(columnMissing).forEach(([col, count]) => {
       if (count > 0) {
         const percent = ((count / data.length) * 100).toFixed(1);

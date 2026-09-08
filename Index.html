@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InsightForge – Turn Raw Data Into Decisions</title>
-  <meta name="description" content="A transparent AI-powered data intelligence platform that turns raw data into analysis, visualizations, insights and decisions." />
+  <meta name="description" content="A transparent AI-powered data intelligence platform." />
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
-  <!-- ========== HEADER ========== -->
+  <!-- HEADER -->
   <header class="header">
     <div class="header-top">
       <div class="logo">
@@ -19,7 +19,6 @@
         <h1 class="logo-text" data-i18n="app.title">InsightForge</h1>
       </div>
 
-      <!-- Language Switcher -->
       <div class="language-switcher">
         <label for="languageSelect" data-i18n="lang.label">Language</label>
         <select id="languageSelect">
@@ -86,10 +85,9 @@
     <p class="tagline" data-i18n="app.tagline">Turn Raw Data Into Decisions</p>
   </header>
 
-  <!-- ========== MAIN CONTENT ========== -->
   <main class="container">
 
-    <!-- Upload Section -->
+    <!-- Upload -->
     <section class="card">
       <h2 data-i18n="upload.title">Upload Dataset</h2>
       <p class="subtitle" data-i18n="upload.subtitle">Upload a CSV file to begin analysis</p>
@@ -117,12 +115,12 @@
       <div class="chart-controls">
         <select id="columnSelect"></select>
         <select id="chartType">
-          <option value="bar" data-i18n="charts.bar">Bar Chart</option>
-          <option value="line" data-i18n="charts.line">Line Chart</option>
-          <option value="pie" data-i18n="charts.pie">Pie Chart</option>
-          <option value="doughnut" data-i18n="charts.doughnut">Doughnut Chart</option>
+          <option value="bar">Bar Chart</option>
+          <option value="line">Line Chart</option>
+          <option value="pie">Pie Chart</option>
+          <option value="doughnut">Doughnut Chart</option>
         </select>
-        <button id="generateChartBtn" data-i18n="charts.generate">Generate Chart</button>
+        <button id="generateChartBtn">Generate Chart</button>
       </div>
       <div class="chart-container">
         <canvas id="mainChart"></canvas>
@@ -135,7 +133,22 @@
       <div id="insightsList"></div>
     </section>
 
-    <!-- ==================== REVIEW SECTION ==================== -->
+    <!-- Heritage QC -->
+    <section class="card" id="heritageSection" hidden>
+      <h2>🛡️ Heritage QC – Data Quality Report</h2>
+      
+      <div class="qc-score-box">
+        <div class="qc-score" id="qcScore">—</div>
+        <div class="qc-label" id="qcLabel">Waiting for data...</div>
+      </div>
+
+      <div class="qc-details" id="qcDetails"></div>
+
+      <h3 style="margin-top: 20px; margin-bottom: 10px;">Issues & Recommendations</h3>
+      <div id="qcIssues" class="qc-issues"></div>
+    </section>
+
+    <!-- Review Section -->
     <section class="card" id="reviewSection">
       <h2>⭐ Leave a Review</h2>
       <p class="subtitle">How is your experience with InsightForge?</p>
@@ -153,13 +166,12 @@
         <input type="hidden" id="selectedRating" value="0" />
 
         <textarea id="reviewComment" placeholder="Write your review here..." rows="4"></textarea>
-        
         <button id="submitReviewBtn">Submit Review</button>
         <p id="reviewMessage" class="review-message"></p>
       </div>
     </section>
 
-    <!-- ==================== ADMIN PANEL ==================== -->
+    <!-- Admin Panel -->
     <section class="card" id="adminSection">
       <h2>🔐 Admin Panel</h2>
       
@@ -185,94 +197,14 @@
     <p data-i18n="footer.text">InsightForge • Built with transparency and purpose</p>
   </footer>
 
-  <!-- ========== SCRIPTS ========== -->
+  <!-- Scripts -->
   <script src="js/i18n.js"></script>
   <script src="js/data.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/insights.js"></script>
+  <script src="js/heritage.js"></script>
   <script src="js/reviews.js"></script>
   <script src="js/admin.js"></script>
   <script src="js/app.js"></script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // ===== Language System =====
-      I18n.init();
-      const languageSelect = document.getElementById('languageSelect');
-      languageSelect.value = I18n.getCurrentLanguage();
-      languageSelect.addEventListener('change', (e) => {
-        I18n.setLanguage(e.target.value);
-      });
-
-      // ===== Star Rating =====
-      const stars = document.querySelectorAll('.star');
-      const selectedRatingInput = document.getElementById('selectedRating');
-
-      stars.forEach(star => {
-        star.addEventListener('click', () => {
-          const value = star.getAttribute('data-value');
-          selectedRatingInput.value = value;
-
-          stars.forEach(s => {
-            s.classList.toggle('active', s.getAttribute('data-value') <= value);
-          });
-        });
-      });
-
-      // ===== Submit Review =====
-      document.getElementById('submitReviewBtn').addEventListener('click', () => {
-        const name = document.getElementById('reviewerName').value;
-        const rating = document.getElementById('selectedRating').value;
-        const comment = document.getElementById('reviewComment').value;
-        const message = document.getElementById('reviewMessage');
-
-        if (rating == 0) {
-          message.textContent = "Please select a rating.";
-          message.style.color = "#f87171";
-          return;
-        }
-
-        ReviewSystem.saveReview(name, rating, comment);
-        message.textContent = "Thank you for your review!";
-        message.style.color = "#4ade80";
-
-        // Reset form
-        document.getElementById('reviewerName').value = "";
-        document.getElementById('reviewComment').value = "";
-        selectedRatingInput.value = 0;
-        stars.forEach(s => s.classList.remove('active'));
-      });
-
-      // ===== Admin Login =====
-      document.getElementById('adminLoginBtn').addEventListener('click', () => {
-        const password = document.getElementById('adminPassword').value;
-        const error = document.getElementById('adminError');
-
-        if (AdminPanel.login(password)) {
-          document.getElementById('adminLogin').hidden = true;
-          document.getElementById('adminDashboard').hidden = false;
-          AdminPanel.renderReviews('adminReviewsList');
-          error.textContent = "";
-        } else {
-          error.textContent = "Wrong password!";
-        }
-      });
-
-      // ===== Admin Logout =====
-      document.getElementById('logoutAdminBtn').addEventListener('click', () => {
-        document.getElementById('adminLogin').hidden = false;
-        document.getElementById('adminDashboard').hidden = true;
-        document.getElementById('adminPassword').value = "";
-      });
-
-      // ===== Clear Reviews =====
-      document.getElementById('clearReviewsBtn').addEventListener('click', () => {
-        if (confirm("Are you sure you want to delete all reviews?")) {
-          ReviewSystem.clearAllReviews();
-          AdminPanel.renderReviews('adminReviewsList');
-        }
-      });
-    });
-  </script>
 </body>
 </html>

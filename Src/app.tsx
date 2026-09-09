@@ -15,8 +15,12 @@ import { useData } from './hooks/useData'
 import { useAnalysis } from './hooks/useAnalysis'
 import { ChartType } from './types/charts'
 import './styles/globals.css'
-
+import ProductPanel from './modules/product-inspection/ProductPanel'
+import PredictivePanel from './modules/predictive-vending/PredictivePanel'
+import AcademicPanel from './modules/academic-inbound/AcademicPanel'
+import LanguageLabPanel from './modules/language-lab/LanguageLabPanel'
 function App() {
+
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeModule, setActiveModule] = useState('dashboard')
   const [selectedColumn, setSelectedColumn] = useState('')
@@ -83,6 +87,14 @@ function App() {
         return <ExportPanel data={data} headers={headers} fileName={fileName} insights={insights} />
       default:
         return <Dashboard hasData={hasData} onUploadClick={() => setActiveModule('upload')} />
+    case 'product':
+      return <ProductPanel data={data} headers={headers} />
+    case 'predictive':
+      return <PredictivePanel data={data} headers={headers} />
+    case 'academic':
+      return <AcademicPanel data={data} headers={headers} />
+    case 'language-lab':
+      return <LanguageLabPanel />
     }
   }
 
